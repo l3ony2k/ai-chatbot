@@ -17,7 +17,11 @@ const commonConfig = {
 };
 
 // Helper functions to create models with common configuration
-const createOpenAI = (model: string) => openai(model, commonConfig);
+const openai = createOpenAI({
+  baseURL: 'https://api.hyprlab.io',
+  apiKey: process.env.HYPRLAB_API_KEY,
+  compatibility: 'compatible' // This is key - use compatible mode for third-party APIs
+});
 const createAnthropic = (model: string) => anthropic(model, commonConfig);
 const createDeepseek = (model: string) => deepseek(model, commonConfig);
 const createPerplexity = (model: string) => perplexity(model, commonConfig);
