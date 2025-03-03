@@ -1,7 +1,7 @@
-import { openai } from '@ai-sdk/openai';
-import { anthropic } from '@ai-sdk/anthropic';
-import { deepseek } from '@ai-sdk/deepseek';
-import { perplexity } from '@ai-sdk/perplexity';
+import { createOpenAI } from '@ai-sdk/openai';
+import { createAnthropic } from '@ai-sdk/anthropic';
+import { createDeepSeek } from '@ai-sdk/deepseek';
+import { createPerplexity } from '@ai-sdk/perplexity';
 import {
   customProvider,
   extractReasoningMiddleware,
@@ -10,41 +10,45 @@ import {
 
 export const DEFAULT_CHAT_MODEL: string = 'gpt-4o-mini';
 
-// Common configuration for all models
-const commonConfig = {
-  baseURL: 'https://api.hyprlab.io',
-  apiKey: process.env.HYPRLAB_API_KEY // Single API key for all models
-};
-
-// Helper functions to create models with common configuration
-const openai = createOpenAI({
-  baseURL: 'https://api.hyprlab.io',
+// Use a different variable name to avoid conflicts
+const openaiClient = createOpenAI({
+  baseURL: 'https://api.hyprlab.io/v1',
   apiKey: process.env.HYPRLAB_API_KEY,
   compatibility: 'compatible' // This is key - use compatible mode for third-party APIs
 });
-const createAnthropic = (model: string) => anthropic(model, commonConfig);
-const createDeepseek = (model: string) => deepseek(model, commonConfig);
-const createPerplexity = (model: string) => perplexity(model, commonConfig);
+const anthropicClient = createAnthropic({
+  baseURL: 'https://api.hyprlab.io/v1',
+  apiKey: process.env.HYPRLAB_API_KEY,
+});
+const deepseekClient = createDeepSeek({
+  baseURL: 'https://api.hyprlab.io/v1',
+  apiKey: process.env.HYPRLAB_API_KEY,
+});
+const perplexityClient = createPerplexity({
+  baseURL: 'https://api.hyprlab.io/v1',
+  apiKey: process.env.HYPRLAB_API_KEY,
+});
+
 
 export const myProvider = customProvider({
   languageModels: {
-    'gpt-4o-mini': createOpenAI('gpt-4o-mini'),
-    'gpt-4o': createOpenAI('gpt-4o'),
-    'chatgpt-4o-latest': createOpenAI('chatgpt-4o-latest'),
-    'o3-mini': createOpenAI('o3-mini'),
-    'claude-3-7-sonnet-latest': createAnthropic('claude-3-7-sonnet-latest'),
+    'gpt-4o-mini': openaiClient('gpt-4o-mini'),
+    'gpt-4o': openaiClient('gpt-4o'),
+    'chatgpt-4o-latest': openaiClient('chatgpt-4o-latest'),
+    'o3-mini': openaiClient('o3-mini'),
+    'claude-3-7-sonnet-latest': anthropicClient('claude-3-7-sonnet-latest'),
     'deepseek-reasoner': wrapLanguageModel({
-      model: createDeepseek('deepseek-reasoner'),
+      model: deepseekClient('deepseek-reasoner'),
       middleware: extractReasoningMiddleware({ tagName: 'think' }),
     }),
-    'deepseek-chat': createDeepseek('deepseek-chat'),
-    'sonar-deep-research': createPerplexity('sonar-deep-research'),
-    'title-model': createOpenAI('gpt-4o-mini'),
-    'artifact-model': createOpenAI('gpt-4o-mini'),
+    'deepseek-chat': deepseekClient('deepseek-chat'),
+    'sonar-deep-research': perplexityClient('sonar-deep-research'),
+    'title-model': openaiClient('gpt-4o-mini'),
+    'artifact-model': openaiClient('gpt-4o-mini'),
   },
   imageModels: {
-    'small-model': openai.image('dall-e-2', commonConfig),
-    'large-model': openai.image('dall-e-3', commonConfig),
+    'small-model': openaiClient.image('dall-e-2'),
+    'large-model': openaiClient.image('dall-e-3'),
   },
 });
 
@@ -57,7 +61,7 @@ interface ChatModel {
 export const chatModels: Array<ChatModel> = [
   {
     id: 'chatgpt-4o-latest',
-    name: 'ChatGPT-4o',
+    name: 'ChatGPT 4o',
     description: 'The latest version of GPT-4o with up-to-date capabilities'
   },
   {

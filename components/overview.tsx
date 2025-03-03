@@ -20,7 +20,8 @@ export const Overview = () => {
           <MessageIcon size={32} />
         </p>
         <p>
-          This is an{' '}
+          hi there, have fun!
+          {/* This is an{' '}
           <Link
             className="font-medium underline underline-offset-4"
             href="https://github.com/vercel/ai-chatbot"
@@ -44,7 +45,7 @@ export const Overview = () => {
           >
             docs
           </Link>
-          .
+          . */}
         </p>
       </div>
     </motion.div>
