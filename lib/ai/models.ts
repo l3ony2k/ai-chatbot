@@ -1,27 +1,46 @@
 import { openai } from '@ai-sdk/openai';
-import { fireworks } from '@ai-sdk/fireworks';
+import { anthropic } from '@ai-sdk/anthropic';
+import { deepseek } from '@ai-sdk/deepseek';
+import { perplexity } from '@ai-sdk/perplexity';
 import {
   customProvider,
   extractReasoningMiddleware,
   wrapLanguageModel,
 } from 'ai';
 
-export const DEFAULT_CHAT_MODEL: string = 'chat-model-small';
+export const DEFAULT_CHAT_MODEL: string = 'gpt-4o-mini';
+
+// Common configuration for all models
+const commonConfig = {
+  baseURL: 'https://api.hyprlab.io',
+  apiKey: process.env.HYPRLAB_API_KEY // Single API key for all models
+};
+
+// Helper functions to create models with common configuration
+const createOpenAI = (model) => openai(model, commonConfig);
+const createAnthropic = (model) => anthropic(model, commonConfig);
+const createDeepseek = (model) => deepseek(model, commonConfig);
+const createPerplexity = (model) => perplexity(model, commonConfig);
 
 export const myProvider = customProvider({
   languageModels: {
-    'chat-model-small': openai('gpt-4o-mini'),
-    'chat-model-large': openai('gpt-4o'),
-    'chat-model-reasoning': wrapLanguageModel({
-      model: fireworks('accounts/fireworks/models/deepseek-r1'),
+    'gpt-4o-mini': createOpenAI('gpt-4o-mini'),
+    'gpt-4o': createOpenAI('gpt-4o'),
+    'chatgpt-4o-latest': createOpenAI('chatgpt-4o-latest'),
+    'o3-mini': createOpenAI('o3-mini'),
+    'claude-3-7-sonnet-latest': createAnthropic('claude-3-7-sonnet-latest'),
+    'deepseek-reasoner': wrapLanguageModel({
+      model: createDeepseek('deepseek-reasoner'),
       middleware: extractReasoningMiddleware({ tagName: 'think' }),
     }),
-    'title-model': openai('gpt-4-turbo'),
-    'artifact-model': openai('gpt-4o-mini'),
+    'deepseek-chat': createDeepseek('deepseek-chat'),
+    'sonar-deep-research': createPerplexity('sonar-deep-research'),
+    'title-model': createOpenAI('gpt-4o-mini'),
+    'artifact-model': createOpenAI('gpt-4o-mini'),
   },
   imageModels: {
-    'small-model': openai.image('dall-e-2'),
-    'large-model': openai.image('dall-e-3'),
+    'small-model': openai.image('dall-e-2', commonConfig),
+    'large-model': openai.image('dall-e-3', commonConfig),
   },
 });
 
@@ -33,18 +52,43 @@ interface ChatModel {
 
 export const chatModels: Array<ChatModel> = [
   {
-    id: 'chat-model-small',
-    name: 'Small model',
-    description: 'Small model for fast, lightweight tasks',
+    id: 'chatgpt-4o-latest',
+    name: 'ChatGPT-4o',
+    description: 'The latest version of GPT-4o with up-to-date capabilities'
   },
   {
-    id: 'chat-model-large',
-    name: 'Large model',
-    description: 'Large model for complex, multi-step tasks',
+    id: 'gpt-4o',
+    name: 'GPT 4o',
+    description: 'OpenAI\'s multimodal model with strong reasoning abilities'
   },
   {
-    id: 'chat-model-reasoning',
-    name: 'Reasoning model',
-    description: 'Uses advanced reasoning',
+    id: 'gpt-4o-mini',
+    name: 'GPT 4o mini',
+    description: 'A smaller, faster version of GPT-4o for everyday tasks'
   },
+  {
+    id: 'o3-mini',
+    name: 'o3 mini',
+    description: 'Fast at advanced reasoning'
+  },
+  {
+    id: 'claude-3-7-sonnet-latest',
+    name: 'Claude 3.7 Sonnet',
+    description: 'Anthropic\'s latest Claude model with advanced capabilities'
+  },
+  {
+    id: 'deepseek-reasoner',
+    name: 'DeepSeek R1',
+    description: 'Specialized for complex reasoning with step-by-step thinking'
+  },
+  {
+    id: 'deepseek-chat',
+    name: 'DeepSeek V3',
+    description: 'General purpose chat model from DeepSeek'
+  },
+  {
+    id: 'sonar-deep-research',
+    name: 'Sonar Deep Research',
+    description: 'Perplexity\'s model for in-depth research and analysis'
+  }
 ];
