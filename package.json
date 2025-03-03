@@ -83,6 +83,11 @@
     "usehooks-ts": "^3.1.0",
     "zod": "^3.23.8"
   },
+  "pnpm": {
+    "overrides": {
+      "@ai-sdk/provider": "1.0.9"
+    }
+  },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
     "@tailwindcss/typography": "^0.5.15",
